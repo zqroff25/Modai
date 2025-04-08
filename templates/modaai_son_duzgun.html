@@ -1,0 +1,116 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ModaAI - Kıyafet Kombin Önerileri</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #f9fafb; }
+        .active-tab { border-bottom: 2px solid #6366f1; color: #6366f1; }
+    </style>
+</head>
+<body>
+<div class="max-w-3xl mx-auto p-4">
+    <h1 class="text-3xl text-center font-bold font-['Pacifico'] text-indigo-600 mb-6">ModaAI</h1>
+    <div class="flex justify-center gap-4 border-b mb-6">
+        <button id="tabKombin" class="py-2 active-tab">Kombin Oluştur</button>
+        <button id="tabYorum" class="py-2">Kıyafet Yorumla</button>
+    </div>
+    <div id="kombinContent">
+        <div id="upload-area" class="border-2 border-dashed rounded-lg p-4 text-center text-gray-400 mb-4 cursor-pointer">
+            Fotoğrafları buraya sürükleyin veya tıklayın
+            <input type="file" id="files" multiple hidden accept="image/*">
+        </div>
+        <div id="preview-area" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4"></div>
+        <select id="tarz" class="block w-full border rounded px-3 py-2 mb-4">
+            <option>Casual</option><option>Spor</option><option>Formal</option><option>Elegant</option><option>Vintage</option>
+        </select>
+        <select id="mevsim" class="block w-full border rounded px-3 py-2 mb-4">
+            <option>İlkbahar</option><option>Yaz</option><option>Sonbahar</option><option>Kış</option>
+        </select>
+        <button id="kombinOlusturBtn" class="w-full bg-indigo-600 text-white py-2 rounded">Kombin Oluştur</button>
+    </div>
+    <div id="yorumContent" class="hidden">
+        <textarea id="yorumText" class="w-full border rounded p-2 mb-4" rows="4" placeholder="Kıyafetinizi tarif edin..."></textarea>
+        <input type="file" id="yorumFile" accept="image/*" class="block w-full text-sm mb-4">
+        <button id="yorumIsteBtn" class="w-full bg-indigo-600 text-white py-2 rounded">Yorum İste</button>
+    </div>
+    <div id="sonuc" class="mt-6 p-4 rounded shadow-md bg-white hidden">
+        <h2 class="text-lg font-bold text-indigo-600">ModaAI Önerileri:</h2>
+        <ul class="mt-3 text-gray-700 space-y-2">
+            <li><strong>Kıyafet Analizi:</strong> <span id="analiz"></span></li>
+            <li><strong>Renk Uyumu:</strong> <span id="renk"></span></li>
+            <li><strong>Kombin Önerisi:</strong> <span id="onerisi"></span></li>
+            <li><strong>Kombin Yorumu:</strong> <span id="yorumu"></span></li>
+            <li><strong>Alternatif Kombin:</strong> <span id="alternatif"></span></li>
+        </ul>
+    </div>
+</div>
+
+<script>
+document.getElementById('tabKombin').onclick = () => {
+    document.getElementById('kombinContent').classList.remove('hidden');
+    document.getElementById('yorumContent').classList.add('hidden');
+    document.getElementById('tabKombin').classList.add('active-tab');
+    document.getElementById('tabYorum').classList.remove('active-tab');
+    document.getElementById('sonuc').classList.add('hidden');
+};
+
+document.getElementById('tabYorum').onclick = () => {
+    document.getElementById('yorumContent').classList.remove('hidden');
+    document.getElementById('kombinContent').classList.add('hidden');
+    document.getElementById('tabYorum').classList.add('active-tab');
+    document.getElementById('tabKombin').classList.remove('active-tab');
+    document.getElementById('sonuc').classList.add('hidden');
+};
+
+const uploadArea = document.getElementById('upload-area');
+const fileInput = document.getElementById('files');
+const previewArea = document.getElementById('preview-area');
+
+uploadArea.onclick = () => fileInput.click();
+uploadArea.ondragover = (e) => { e.preventDefault(); uploadArea.classList.add('bg-indigo-50'); };
+uploadArea.ondragleave = () => uploadArea.classList.remove('bg-indigo-50');
+uploadArea.ondrop = (e) => {
+    e.preventDefault(); uploadArea.classList.remove('bg-indigo-50');
+    fileInput.files = e.dataTransfer.files; previewFiles(e.dataTransfer.files);
+};
+fileInput.onchange = () => previewFiles(fileInput.files);
+
+function previewFiles(files) {
+    previewArea.innerHTML = '';
+    for (let file of files) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewArea.innerHTML += `<div class="rounded overflow-hidden shadow-md">
+                <img src="${e.target.result}" class="w-full h-32 object-cover"></div>`;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+document.getElementById('kombinOlusturBtn').onclick = () => {
+    const files = document.getElementById('files').files;
+    if (files.length < 2) { alert('En az 2 resim yükleyiniz!'); return; }
+    let formData = new FormData();
+    for (let i=0; i<files.length; i++) { formData.append('files[]', files[i]); }
+    formData.append('tarz', document.getElementById('tarz').value);
+    formData.append('mevsim', document.getElementById('mevsim').value);
+
+    fetch('/kombin-olustur', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(data => {
+        document.getElementById('analiz').textContent = data.gemma2_cevabi.kombin_analizi;
+        document.getElementById('renk').textContent = data.gemma2_cevabi.renk_uyumu;
+        document.getElementById('onerisi').textContent = data.gemma2_cevabi.kombin_onerisi;
+        document.getElementById('yorumu').textContent = data.gemma2_cevabi.kombin_yorumu;
+        document.getElementById('alternatif').textContent = data.gemma2_cevabi.alternatif_kombin;
+        document.getElementById('sonuc').classList.remove('hidden');
+    });
+};
+</script>
+</body>
+</html>

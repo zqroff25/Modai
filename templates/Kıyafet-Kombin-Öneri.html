@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moda Asistanı - AI Kombin Önerileri</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config={theme:{extend:{colors:{primary:'#6366f1',secondary:'#f97316'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :where([class^="ri-"])::before { content: "\f3c2"; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f9fafb;
+        }
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover, .upload-area.dragover {
+            border-color: #6366f1;
+            background-color: rgba(99, 102, 241, 0.05);
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .tab-active {
+            color: #6366f1;
+            border-bottom: 2px solid #6366f1;
+        }
+        .custom-switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+        }
+        .custom-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e5e7eb;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #6366f1;
+        }
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 flex items-center justify-center text-primary">
+                    <i class="ri-t-shirt-2-line ri-2x"></i>
+                </div>
+                <h1 class="text-2xl font-['Pacifico'] text-gray-800">ModaAI</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="text-gray-600 hover:text-primary transition-colors">
+                    <div class="w-10 h-10 flex items-center justify-center">
+                        <i class="ri-question-line ri-lg"></i>
+                    </div>
+                </button>
+                <button class="text-gray-600 hover:text-primary transition-colors">
+                    <div class="w-10 h-10 flex items-center justify-center">
+                        <i class="ri-user-line ri-lg"></i>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- Hero Section -->
+            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-8 mb-8 flex flex-col md:flex-row items-center justify-between">
+                <div class="md:w-1/2 mb-6 md:mb-0">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-4">AI ile Tarzınızı Keşfedin</h2>
+                    <p class="text-gray-600 mb-6">Kıyafetlerinizi yükleyin, yapay zeka ile kişiselleştirilmiş kombin önerileri alın ve tarzınızı geliştirin.</p>
+                    <button class="bg-primary hover:bg-indigo-600 text-white px-6 py-3 rounded-button shadow-md transition-colors whitespace-nowrap">
+                        Hemen Başla
+                    </button>
+                </div>
+                <div class="md:w-2/5">
+                    <img src="https://public.readdy.ai/ai/img_res/2b0db6f9b5fad200d83ca9a7e76a9194.jpg" alt="Moda Kombinleri" class="w-full h-auto rounded-lg shadow-lg">
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-200 mb-8">
+                <button id="tab-kombin" class="tab-active px-6 py-3 font-medium text-lg focus:outline-none whitespace-nowrap">
+                    Kombin Oluştur
+                </button>
+                <button id="tab-yorum" class="text-gray-500 px-6 py-3 font-medium text-lg focus:outline-none whitespace-nowrap">
+                    Kıyafet Yorumla
+                </button>
+            </div>
+
+            <!-- Kombin Oluştur Content -->
+            <div id="content-kombin" class="mb-8">
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Kıyafetlerinizi Yükleyin</h3>
+                    <p class="text-gray-600 mb-6">Kombininiz için kıyafet fotoğraflarını yükleyin. En az 2 parça kıyafet yüklemeniz önerilir.</p>
+                    
+                    <div class="upload-area rounded-xl p-8 text-center mb-6">
+                        <div class="w-16 h-16 mx-auto mb-4 text-gray-400 flex items-center justify-center">
+                            <i class="ri-upload-cloud-line ri-3x"></i>
+                        </div>
+                        <h4 class="text-lg font-medium text-gray-700 mb-2">Dosyaları buraya sürükleyin</h4>
+                        <p class="text-gray-500 text-sm mb-4">veya</p>
+                        <button class="bg-primary hover:bg-indigo-600 text-white px-5 py-2 rounded-button shadow-sm transition-colors whitespace-nowrap">
+                            Dosya Seç
+                        </button>
+                        <input type="file" id="file-upload" class="hidden" multiple accept="image/*">
+                        <p class="text-gray-500 text-xs mt-4">PNG, JPG veya JPEG formatında dosyalar (max. 5MB)</p>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
+                        <div class="relative bg-gray-100 rounded-lg overflow-hidden aspect-square">
+                            <img src="https://public.readdy.ai/ai/img_res/07b179e23ad8158168259922993224cc.jpg" alt="Beyaz Tişört" class="w-full h-full object-cover">
+                            <button class="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full p-1 text-gray-600 hover:text-red-500 transition-colors">
+                                <div class="w-5 h-5 flex items-center justify-center">
+                                    <i class="ri-close-line"></i>
+                                </div>
+                            </button>
+                        </div>
+                        <div class="relative bg-gray-100 rounded-lg overflow-hidden aspect-square">
+                            <img src="https://public.readdy.ai/ai/img_res/edfe1de6578b34bd87a23f8ee1314564.jpg" alt="Kot Pantolon" class="w-full h-full object-cover">
+                            <button class="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full p-1 text-gray-600 hover:text-red-500 transition-colors">
+                                <div class="w-5 h-5 flex items-center justify-center">
+                                    <i class="ri-close-line"></i>
+                                </div>
+                            </button>
+                        </div>
+                        <div class="relative bg-gray-100 rounded-lg overflow-hidden aspect-square">
+                            <img src="https://public.readdy.ai/ai/img_res/a70428c49dee166cae262376e53b3e7b.jpg" alt="Spor Ayakkabı" class="w-full h-full object-cover">
+                            <button class="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full p-1 text-gray-600 hover:text-red-500 transition-colors">
+                                <div class="w-5 h-5 flex items-center justify-center">
+                                    <i class="ri-close-line"></i>
+                                </div>
+                            </button>
+                        </div>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center aspect-square hover:border-primary transition-colors cursor-pointer">
+                            <div class="text-gray-400 flex flex-col items-center">
+                                <div class="w-8 h-8 flex items-center justify-center">
+                                    <i class="ri-add-line ri-lg"></i>
+                                </div>
+                                <span class="text-xs mt-1">Ekle</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tarz Tercihi</label>
+                            <div class="relative">
+                                <select class="w-full bg-gray-50 border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                                    <option>Günlük (Casual)</option>
+                                    <option>Spor (Sportif)</option>
+                                    <option>Resmi (Formal)</option>
+                                    <option>Şık (Elegant)</option>
+                                    <option>Vintage</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                    <div class="w-5 h-5 flex items-center justify-center">
+                                        <i class="ri-arrow-down-s-line"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Mevsim</label>
+                            <div class="relative">
+                                <select class="w-full bg-gray-50 border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                                    <option>İlkbahar</option>
+                                    <option>Yaz</option>
+                                    <option>Sonbahar</option>
+                                    <option>Kış</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                    <div class="w-5 h-5 flex items-center justify-center">
+                                        <i class="ri-arrow-down-s-line"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button class="bg-primary hover:bg-indigo-600 text-white px-8 py-3 rounded-button shadow-md transition-colors text-lg font-medium whitespace-nowrap">
+                        <div class="flex items-center justify-center">
+                            <div class="w-5 h-5 mr-2 flex items-center justify-center">
+                                <i class="ri-magic-line"></i>
+                            </div>
+                            <span>Kombin Oluştur</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Kıyafet Yorumla Content (Hidden by default) -->
+            <div id="content-yorum" class="hidden mb-8">
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Kıyafetinizi Tanımlayın</h3>
+                    <p class="text-gray-600 mb-6">Kıyafetinizi detaylı bir şekilde tanımlayın, AI size stil önerileri ve yorumlar sunacak.</p>
+                    
+                    <div class="mb-6">
+                        <textarea class="w-full bg-gray-50 border border-gray-300 rounded p-4 h-32 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none" placeholder="Örneğin: Beyaz bir tişört, mavi kot pantolon ve siyah spor ayakkabı kombinimi ofis için uygun bulur musunuz?"></textarea>
+                    </div>
+
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center">
+                            <label class="custom-switch mr-3">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span class="text-sm text-gray-700">Fotoğraf yükle</span>
+                        </div>
+                        <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-button transition-colors whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="w-5 h-5 mr-1 flex items-center justify-center">
+                                    <i class="ri-image-add-line"></i>
+                                </div>
+                                <span>Fotoğraf Ekle</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="text-center">
+                        <button class="bg-primary hover:bg-indigo-600 text-white px-8 py-3 rounded-button shadow-md transition-colors text-lg font-medium whitespace-nowrap">
+                            <div class="flex items-center justify-center">
+                                <div class="w-5 h-5 mr-2 flex items-center justify-center">
+                                    <i class="ri-chat-1-line"></i>
+                                </div>
+                                <span>Yorum İste</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Example AI Response -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-start mb-4">
+                        <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3 flex-shrink-0">
+                            <div class="w-6 h-6 text-primary flex items-center justify-center">
+                                <i class="ri-robot-line"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-800">ModaAI Asistanı</h4>
+                            <p class="text-gray-500 text-sm">7 Nisan 2025, 14:32</p>
+                        </div>
+                    </div>
+                    
+                    <div class="pl-13 text-gray-700 space-y-4">
+                        <p>Merhaba! Bahsettiğiniz beyaz tişört, mavi kot pantolon ve siyah spor ayakkabı kombinasyonu klasik ve çok yönlü bir seçim.</p>
+                        
+                        <p>Bu kombin ofis ortamı için:</p>
+                        
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li><strong>Smart Casual</strong> ofisler için uygundur, özellikle tişörtünüz düz ve temiz görünümlüyse.</li>
+                            <li>Daha resmi bir ofis ortamında, beyaz tişört yerine açık mavi veya beyaz bir gömlek tercih edebilirsiniz.</li>
+                            <li>Kombininizi tamamlamak için siyah veya kahverengi bir kemer ekleyebilirsiniz.</li>
+                        </ul>
+                        
+                        <p>Önerilerim:</p>
+                        
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>Ofis için tişörtün üzerine lacivert veya gri bir blazer ceket ekleyerek kombinizi daha profesyonel hale getirebilirsiniz.</li>
+                            <li>Aksesuarlar olarak minimal bir saat ve deri bileklik düşünebilirsiniz.</li>
+                            <li>Yaz aylarında bu kombin ideal, ancak kış için üzerine bir trençkot veya şık bir mont eklemeyi unutmayın.</li>
+                        </ul>
+                        
+                        <p>Genel olarak, bu kombin ofis ortamının resmiyet seviyesine bağlı olarak uygun olabilir. Daha resmi bir ofiste, tişört yerine gömlek tercih etmenizi öneririm.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section (Initially Hidden) -->
+            <div id="results-section" class="hidden">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Kombin Önerileri</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <!-- Kombin 1 -->
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                        <div class="relative aspect-[4/3]">
+                            <img src="https://public.readdy.ai/ai/img_res/25484cee9ffcaa105f538e5d1bfb5780.jpg" alt="Kombin Önerisi 1" class="w-full h-full object-cover">
+                            <div class="absolute top-3 right-3 flex space-x-2">
+                                <button class="bg-white/80 hover:bg-white rounded-full p-2 text-gray-600 hover:text-red-500 transition-colors">
+                                    <div class="w-5 h-5 flex items-center justify-center">
+                                        <i class="ri-heart-line"></i>
+                                    </div>
+                                </button>
+                                <button class="bg-white/80 hover:bg-white rounded-full p-2 text-gray-600 hover:text-primary transition-colors">
+                                    <div class="w-5 h-5 flex items-center justify-center">
+                                        <i class="ri-share-line"></i>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <h4 class="font-medium text-lg text-gray-800 mb-2">Günlük Şehir Stili</h4>
+                            <p class="text-gray-600 text-sm mb-3">Rahat ve şık bir günlük kombin. Beyaz tişört ve mavi kot her zaman mükemmel uyum sağlar.</p>
+                            <div class="flex items-center text-sm text-gray-500">
+                                <div class="w-4 h-4 mr-1 flex items-center justify-center">
+                                    <i class="ri-star-line"></i>
+                                </div>
+                                <span>Casual • İlkbahar/Yaz</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kombin 2 -->
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                        <div class="relative aspect-[4/3]">
+                            <img src="https://public.readdy.ai/ai/img_res/8cc0b27ec1fdf7e2b99bcdeb8c0eebae.jpg" alt="Kombin Önerisi 2" class="w-full h-full object-cover">
+                            <div class="absolute top-3 right-3 flex space-x-2">
+                                <button class="bg-white/80 hover:bg-white rounded-full p-2 text-gray-600 hover:text-red-500 transition-colors">
+                                    <div class="w-5 h-5 flex items-center justify-center">
+                                        <i class="ri-heart-line"></i>
+                                    </div>
+                                </button>
+                                <button class="bg-white/80 hover:bg-white rounded-full p-2 text-gray-600 hover:text-primary transition-colors">
+                                    <div class="w-5 h-5 flex items-center justify-center">
+                                        <i class="ri-share-line"></i>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <h4 class="font-medium text-lg text-gray-800 mb-2">Smart Casual Ofis Stili</h4>
+                            <p class="text-gray-600 text-sm mb-3">Lacivert blazer ile tamamlanmış şık ve profesyonel bir görünüm. Ofis için ideal.</p>
+                            <div class="flex items-center text-sm text-gray-500">
+                                <div class="w-4 h-4 mr-1 flex items-center justify-center">
+                                    <i class="ri-star-line"></i>
+                                </div>
+                                <span>Smart Casual • Tüm Mevsimler</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center space-y-4">
+                    <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-button shadow-sm transition-colors whitespace-nowrap">
+                        <div class="flex items-center justify-center">
+                            <div class="w-5 h-5 mr-2 flex items-center justify-center">
+                                <i class="ri-refresh-line"></i>
+                            </div>
+                            <span>Yeni Kombinler Oluştur</span>
+                        </div>
+                    </button>
+                    <p class="text-gray-500 text-sm">Beğendiğiniz kombinleri kaydetmek için kalp ikonuna tıklayabilirsiniz</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-50 border-t border-gray-200 mt-12">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 flex items-center justify-center text-primary">
+                            <i class="ri-t-shirt-2-line ri-lg"></i>
+                        </div>
+                        <h2 class="text-xl font-['Pacifico'] text-gray-800">ModaAI</h2>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-2">© 2025 ModaAI. Tüm hakları saklıdır.</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-500 hover:text-primary transition-colors">
+                        <div class="w-10 h-10 flex items-center justify-center">
+                            <i class="ri-instagram-line ri-lg"></i>
+                        </div>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-primary transition-colors">
+                        <div class="w-10 h-10 flex items-center justify-center">
+                            <i class="ri-twitter-x-line ri-lg"></i>
+                        </div>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-primary transition-colors">
+                        <div class="w-10 h-10 flex items-center justify-center">
+                            <i class="ri-facebook-circle-line ri-lg"></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="border-t border-gray-200 mt-6 pt-6 flex flex-col md:flex-row justify-between">
+                <div class="flex flex-wrap gap-4 mb-4 md:mb-0">
+                    <a href="#" class="text-gray-600 hover:text-primary text-sm transition-colors">Hakkımızda</a>
+                    <a href="#" class="text-gray-600 hover:text-primary text-sm transition-colors">Gizlilik Politikası</a>
+                    <a href="#" class="text-gray-600 hover:text-primary text-sm transition-colors">Kullanım Şartları</a>
+                    <a href="#" class="text-gray-600 hover:text-primary text-sm transition-colors">İletişim</a>
+                </div>
+                <div class="text-gray-500 text-sm">
+                    Yapay zeka destekli moda asistanı
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Tab switching functionality
+        const tabKombin = document.getElementById('tab-kombin');
+        const tabYorum = document.getElementById('tab-yorum');
+        const contentKombin = document.getElementById('content-kombin');
+        const contentYorum = document.getElementById('content-yorum');
+        const resultsSection = document.getElementById('results-section');
+        tabKombin.addEventListener('click', () => {
+            tabKombin.classList.add('tab-active');
+            tabYorum.classList.remove('tab-active');
+            tabYorum.classList.add('text-gray-500');
+            contentKombin.classList.remove('hidden');
+            contentYorum.classList.add('hidden');
+            resultsSection.classList.add('hidden');
+        });
+
+        tabYorum.addEventListener('click', () => {
+            tabYorum.classList.add('tab-active');
+            tabYorum.classList.remove('text-gray-500');
+            tabKombin.classList.remove('tab-active');
+            contentYorum.classList.remove('hidden');
+            contentKombin.classList.add('hidden');
+            resultsSection.classList.add('hidden');
+        });
+
+        // File upload functionality
+        const uploadArea = document.querySelector('.upload-area');
+        const fileInput = document.getElementById('file-upload');
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            // Handle file drop
+        });
+
+        // Show results when clicking "Kombin Oluştur" button
+        const kombinButton = document.querySelector('#content-kombin button.bg-primary');
+        kombinButton.addEventListener('click', () => {
+            contentKombin.classList.add('hidden');
+            resultsSection.classList.remove('hidden');
+        });
+    </script>
+    <script>
+        document.querySelector('#content-kombin button.bg-primary').addEventListener('click', () => {
+            const fileInput = document.getElementById('file-upload');
+            const files = fileInput.files;
+        
+            if (files.length < 2) {
+                alert("Lütfen en az 2 kıyafet resmi yükleyiniz.");
+                return;
+            }
+        
+            const formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files[]', files[i]);
+            }
+        
+            fetch('/kombin-olustur', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data); // Burada gelen veriyi HTML içine yerleştireceğiz.
+                alert("Açıklamalar: " + data.blip_aciklamalari.join(', '));
+            })
+            .catch(error => {
+                console.error('Hata:', error);
+            });
+        });
+    </script>
+    </script>    
+</body>
+</html>

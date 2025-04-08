@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ModaAI - Kıyafet Kombin ve Yorum</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="manifest" href="/static/manifest.json">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f9fafb;
+    }
+    .custom-shadow { box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+    .transition-base { transition: all 0.3s ease; }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="bg-white custom-shadow">
+  <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+    <!-- Logo / Brand -->
+    <div class="flex items-center space-x-2">
+      <div class="w-10 h-10 flex items-center justify-center text-indigo-600">
+        <i class="ri-t-shirt-2-line ri-2x"></i>
+      </div>
+      <h1 class="text-2xl font-['Pacifico'] text-gray-800">
+        ModaAI
+      </h1>
+    </div>
+    <!-- Menü -->
+    <nav class="text-gray-600">
+      <ul class="flex space-x-4">
+        <li><a href="#" class="hover:text-indigo-600 transition-base">Anasayfa</a></li>
+        <li><a href="#" class="hover:text-indigo-600 transition-base">Hakkımızda</a></li>
+        <li><a href="#" class="hover:text-indigo-600 transition-base">İletişim</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="container mx-auto px-4 py-8 flex flex-col md:flex-row items-center justify-between">
+  <div class="md:w-1/2 mb-6 md:mb-0">
+    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+      AI ile Tarzınızı Keşfedin
+    </h2>
+    <p class="text-gray-600 mb-6">
+      Kıyafetlerinizi yükleyin, yapay zeka ile kişiselleştirilmiş kombin önerileri alın ve tarzınızı geliştirin.
+    </p>
+    <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded shadow-md transition-base">
+      Hemen Başla
+    </button>
+  </div>
+  <!-- Slider Bölümü: Bu alanı hero bölümü altına ya da sayfanın istediğiniz bir kısmına ekleyebilirsiniz -->
+<!-- Slider Bölümü (hero'nun hemen altına ekleyebilirsiniz) -->
+<div id="slider" class="relative w-full h-96 overflow-hidden my-8">
+    <div id="slider-inner" class="flex transition-transform duration-1000 ease-out w-full h-full">
+      <img src="/static/slider1.jpg" alt="Slider 1" class="w-full h-full object-contain flex-shrink-0">
+      <img src="/static/slider2.jpg" alt="Slider 2" class="w-full h-full object-contain flex-shrink-0">
+      <img src="/static/slider3.jpg" alt="Slider 3" class="w-full h-full object-contain flex-shrink-0">
+      <img src="/static/slider4.jpg" alt="Slider 4" class="w-full h-full object-contain flex-shrink-0">
+      <img src="/static/slider5.jpg" alt="Slider 5" class="w-full h-full object-contain flex-shrink-0">
+      <img src="/static/slider6.jpg" alt="Slider 6" class="w-full h-full object-contain flex-shrink-0">
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function(){
+      const sliderInner = document.getElementById('slider-inner');
+      const slidesCount = sliderInner.children.length;
+      let currentIndex = 0;
+  
+      setInterval(() => {
+        currentIndex = (currentIndex + 1) % slidesCount;
+        // Her slayt genişliği %100 olduğu için, çarpan kadar sola çeviriyoruz
+        sliderInner.style.transform = 'translateX(-' + currentIndex * 100 + '%)';
+      }, 3000); // 3 saniyede bir slayt geçişi
+    });
+  </script>
+</section>
+
+<!-- Kombin Oluştur Bölümü -->
+<section class="container mx-auto px-4 py-8 bg-white rounded-lg custom-shadow mb-8">
+  <h3 class="text-2xl font-semibold text-gray-800 mb-4">
+    Kombin Oluştur
+  </h3>
+  <p class="text-gray-600 mb-6">
+    En az 2 parça kıyafet yüklemeniz önerilir. Farklı görseller ekleyerek yapay zekanın size özel kombinler hazırlamasına izin verin.
+  </p>
+
+  <!-- Kıyafet Ekleme Alanı (Drag & Drop) -->
+  <div
+    id="upload-area"
+    class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-400 mb-6 cursor-pointer transition-base hover:border-indigo-600"
+  >
+    <div class="w-16 h-16 mx-auto mb-4">
+      <i class="ri-upload-cloud-line ri-3x"></i>
+    </div>
+    <h4 class="font-semibold text-gray-700 mb-2">
+      Dosyaları buraya sürükleyin
+    </h4>
+    <p class="text-sm text-gray-500">veya</p>
+    <button
+      class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded shadow-sm transition-base mt-4"
+    >
+      Dosya Seç
+    </button>
+    <input
+      type="file"
+      id="files"
+      class="hidden"
+      multiple
+      accept="image/*"
+    />
+    <p class="text-xs text-gray-400 mt-3">
+      PNG, JPG veya JPEG (max. 5MB)
+    </p>
+  </div>
+
+  <!-- Seçili Kıyafetlerin Önizlemesi -->
+  <div id="preview-area" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6"></div>
+
+  <!-- Tarz / Mevsim Seçimi -->
+  <div class="flex flex-col sm:flex-row gap-4 mb-6">
+    <div class="flex-1">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Tarz Tercihi</label>
+      <select
+        id="tarz"
+        class="w-full bg-gray-50 border border-gray-300 text-gray-700 py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-indigo-100"
+      >
+        <option>Casual</option>
+        <option>Spor</option>
+        <option>Formal</option>
+        <option>Elegant</option>
+        <option>Vintage</option>
+      </select>
+    </div>
+    <div class="flex-1">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Mevsim</label>
+      <select
+        id="mevsim"
+        class="w-full bg-gray-50 border border-gray-300 text-gray-700 py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-indigo-100"
+      >
+        <option>İlkbahar</option>
+        <option>Yaz</option>
+        <option>Sonbahar</option>
+        <option>Kış</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Kombin Oluştur Butonu (Animasyonlu) -->
+  <div class="text-center">
+    <button
+      id="kombinOlusturBtn"
+      class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded shadow-md text-lg font-medium transition-base"
+    >
+      <i class="ri-magic-line mr-2"></i>Kombin Oluştur
+    </button>
+  </div>
+</section>
+
+<!-- Kombin Sonuçları Bölümü -->
+<section class="container mx-auto px-4 mb-8">
+  <div
+    id="sonuc"
+    class="hidden bg-white rounded-lg custom-shadow p-6"
+  >
+    <h2 class="text-xl font-bold text-indigo-600 mb-4">
+      AI Kombin Sonuçları
+    </h2>
+    <ul class="mt-3 text-gray-700 space-y-2">
+      <li><strong>Kıyafet Analizi:</strong> <span id="analiz"></span></li>
+      <li><strong>Renk Uyumu:</strong> <span id="renk"></span></li>
+      <li><strong>Kombin Önerisi:</strong> <span id="onerisi"></span></li>
+      <li><strong>Kombin Yorumu:</strong> <span id="yorumu"></span></li>
+      <li><strong>Alternatif Kombin:</strong> <span id="alternatif"></span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- Kıyafet Yorumla Bölümü -->
+<section class="container mx-auto px-4 py-8 bg-white rounded-lg custom-shadow mb-8">
+  <h3 class="text-2xl font-semibold text-gray-800 mb-4">
+    Kıyafet Yorumla
+  </h3>
+  <p class="text-gray-600 mb-6">
+    Kıyafetinizi buraya detaylı tanımlayabilir veya fotoğraf yükleyebilirsiniz. AI size kısa bir yorum ve öneri verecektir.
+  </p>
+
+  <!-- Yorum metni -->
+  <textarea
+    id="yorumText"
+    class="w-full bg-gray-50 border border-gray-300 rounded p-4 h-32 focus:outline-none focus:ring-2 focus:ring-indigo-100 resize-none mb-4"
+    placeholder="Örneğin: Beyaz gömlek, mavi kot pantolon ve siyah ayakkabıyla ofise gitmeyi düşünüyorum..."
+  ></textarea>
+
+  <!-- Yorum dosya yükleme butonu -->
+  <div class="mb-4">
+    <label for="yorumFile" class="cursor-pointer inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded shadow-sm transition-base">
+      Dosya Seç
+    </label>
+    <input type="file" id="yorumFile" accept="image/*" class="hidden">
+  </div>
+  <div id="yorumPreview" class="mb-4"></div>
+  <!-- Yorum İste Butonu (Animasyonlu) -->
+  <div class="text-center">
+    <button
+      id="yorumIsteBtn"
+      class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded shadow-md text-lg font-medium transition-base"
+    >
+      <i class="ri-chat-1-line mr-2"></i>Yorum İste
+    </button>
+  </div>
+
+  <!-- Yorum Sonucu Gösterim Alanı -->
+  <div
+    id="yorumSonuc"
+    class="hidden mt-6 p-4 rounded-lg bg-gray-50 border border-gray-200"
+  >
+    <h4 class="text-lg font-semibold text-indigo-600 mb-2">
+      Kıyafet Yorumu
+    </h4>
+    <p class="text-gray-700" id="yorumSonucMetni">
+      <!-- Yorum metni buraya gelecek -->
+    </p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-white custom-shadow mt-8">
+  <div class="container mx-auto px-4 py-8">
+    <div class="flex flex-col md:flex-row justify-between items-center">
+      <div class="mb-4 md:mb-0">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 flex items-center justify-center text-indigo-600">
+            <i class="ri-t-shirt-2-line ri-lg"></i>
+          </div>
+          <h2 class="text-xl font-['Pacifico'] text-gray-800">ModaAI</h2>
+        </div>
+        <p class="text-gray-500 text-sm mt-2">© 2025 ModaAI. Tüm hakları saklıdır.</p>
+      </div>
+      <div class="flex space-x-4">
+        <a href="#" class="text-gray-500 hover:text-indigo-600 transition-base">
+          <div class="w-10 h-10 flex items-center justify-center">
+            <i class="ri-instagram-line ri-lg"></i>
+          </div>
+        </a>
+        <a href="#" class="text-gray-500 hover:text-indigo-600 transition-base">
+          <div class="w-10 h-10 flex items-center justify-center">
+            <i class="ri-twitter-line ri-lg"></i>
+          </div>
+        </a>
+        <a href="#" class="text-gray-500 hover:text-indigo-600 transition-base">
+          <div class="w-10 h-10 flex items-center justify-center">
+            <i class="ri-facebook-circle-line ri-lg"></i>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="border-t border-gray-200 mt-6 pt-6 flex flex-col md:flex-row justify-between">
+      <div class="flex flex-wrap gap-4 mb-4 md:mb-0">
+        <a href="#" class="text-gray-600 hover:text-indigo-600 text-sm transition-base">Gizlilik Politikası</a>
+        <a href="#" class="text-gray-600 hover:text-indigo-600 text-sm transition-base">Kullanım Şartları</a>
+        <a href="#" class="text-gray-600 hover:text-indigo-600 text-sm transition-base">Destek</a>
+      </div>
+      <div class="text-gray-500 text-sm">
+        Yapay zeka destekli moda asistanı
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Remix Icon (opsiyonel) -->
+<script src="https://unpkg.com/remixicon/fonts/remixicon.js"></script>
+<script>
+// ------------------------------
+//  GLOBAL: Seçili dosyaları saklama
+// ------------------------------
+let selectedFiles = [];
+
+// ------------------------------
+//  KOMBİN OLUŞTUR: Dosya yükleme, önizleme ve silme
+// ------------------------------
+const uploadArea = document.getElementById('upload-area');
+const fileInput = document.getElementById('files');
+const previewArea = document.getElementById('preview-area');
+
+uploadArea.onclick = () => fileInput.click();
+uploadArea.ondragover = (e) => { e.preventDefault(); uploadArea.classList.add('bg-indigo-50'); };
+uploadArea.ondragleave = () => uploadArea.classList.remove('bg-indigo-50');
+uploadArea.ondrop = (e) => {
+  e.preventDefault();
+  uploadArea.classList.remove('bg-indigo-50');
+  addFiles(e.dataTransfer.files);
+};
+fileInput.onchange = () => addFiles(fileInput.files);
+
+function addFiles(files) {
+  for (let file of files) {
+    if (file.size > 5 * 1024 * 1024) {
+      alert("5MB'den büyük dosyalar yüklenemez: " + file.name);
+      continue;
+    }
+    selectedFiles.push(file);
+  }
+  renderPreview();
+}
+
+function renderPreview() {
+  previewArea.innerHTML = '';
+  selectedFiles.forEach((file, index) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewArea.innerHTML += `
+        <div class="relative bg-gray-100 rounded-lg overflow-hidden aspect-square">
+          <img src="${e.target.result}" class="w-full h-full object-cover">
+          <button
+            class="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full p-1 text-gray-600 hover:text-red-500 transition-base"
+            onclick="removeFile(${index})"
+          >
+            <i class="ri-close-line"></i>
+          </button>
+        </div>`;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeFile(index) {
+  selectedFiles.splice(index, 1);
+  renderPreview();
+}
+
+// ------------------------------
+//  KOMBİN OLUŞTUR: Buton İşlevi (Animasyonlu)
+// ------------------------------
+document.getElementById('kombinOlusturBtn').onclick = () => {
+  if (selectedFiles.length < 2) {
+    alert('En az 2 resim yükleyiniz!');
+    return;
+  }
+  
+  const kombinBtn = document.getElementById('kombinOlusturBtn');
+  kombinBtn.disabled = true;
+  const originalKombinBtnHTML = kombinBtn.innerHTML;
+  kombinBtn.innerHTML = `<span class="animate-spin inline-block w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full mr-2"></span> Kombin Oluşturuluyor...`;
+  
+  let formData = new FormData();
+  for (let i = 0; i < selectedFiles.length; i++) {
+    formData.append('files[]', selectedFiles[i]);
+  }
+  formData.append('tarz', document.getElementById('tarz').value);
+  formData.append('mevsim', document.getElementById('mevsim').value);
+  
+  fetch('/kombin-olustur', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('analiz').textContent = data.gemma2_cevabi.kombin_analizi;
+      document.getElementById('renk').textContent = data.gemma2_cevabi.renk_uyumu;
+      document.getElementById('onerisi').textContent = data.gemma2_cevabi.kombin_onerisi;
+      document.getElementById('yorumu').textContent = data.gemma2_cevabi.kombin_yorumu;
+      document.getElementById('alternatif').textContent = data.gemma2_cevabi.alternatif_kombin;
+      document.getElementById('sonuc').classList.remove('hidden');
+      kombinBtn.innerHTML = originalKombinBtnHTML;
+      kombinBtn.disabled = false;
+    })
+    .catch(error => {
+      console.error('Hata:', error);
+      alert("Kombin oluştururken bir hata oluştu. Lütfen sonra tekrar deneyin.");
+      kombinBtn.innerHTML = originalKombinBtnHTML;
+      kombinBtn.disabled = false;
+    });
+};
+
+// ------------------------------
+//  KIYAFET YORUMLA: Buton İşlevi (Animasyonlu)
+// ------------------------------
+document.getElementById('yorumIsteBtn').onclick = () => {
+  const yorumText = document.getElementById('yorumText').value;
+  const yorumFileInput = document.getElementById('yorumFile');
+  
+  const yorumBtn = document.getElementById('yorumIsteBtn');
+  yorumBtn.disabled = true;
+  const originalYorumBtnHTML = yorumBtn.innerHTML;
+  yorumBtn.innerHTML = `<span class="animate-spin inline-block w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full mr-2"></span> Yorum Hazırlanıyor...`;
+  
+  let formData = new FormData();
+  formData.append('yorum', yorumText);
+  if (yorumFileInput.files.length > 0) {
+    formData.append('yorumFile', yorumFileInput.files[0]);
+  }
+  
+  fetch('/yorum-olustur', { method: 'POST', body: formData })
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('yorumSonucMetni').textContent = data.yorum || "Bir yorum bulunamadı.";
+      document.getElementById('yorumSonuc').classList.remove('hidden');
+      yorumBtn.innerHTML = originalYorumBtnHTML;
+      yorumBtn.disabled = false;
+    })
+    .catch(error => {
+      console.error('Hata:', error);
+      document.getElementById('yorumSonucMetni').textContent = "Yorum oluştururken bir hata oluştu!";
+      document.getElementById('yorumSonuc').classList.remove('hidden');
+      yorumBtn.innerHTML = originalYorumBtnHTML;
+      yorumBtn.disabled = false;
+    });
+};
+</script>
+<!-- Yorum dosyası önizleme ve kaldırma -->
+<script>// Yorum dosyası için global değişken
+    let selectedYorumFile = null;
+    
+    // Yorum dosyası önizlemesini ayarlayan fonksiyon
+    function setupYorumPreview() {
+      const yorumFileInput = document.getElementById('yorumFile');
+      const yorumPreviewContainer = document.getElementById('yorumPreview');
+    
+      yorumFileInput.addEventListener('change', function() {
+        // Önce mevcut önizlemeyi temizle
+        yorumPreviewContainer.innerHTML = "";
+        if (yorumFileInput.files && yorumFileInput.files[0]) {
+          selectedYorumFile = yorumFileInput.files[0];
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            yorumPreviewContainer.innerHTML = `
+              <div class="relative bg-gray-100 rounded-lg overflow-hidden w-32 h-32">
+                <img src="${e.target.result}" class="w-full h-full object-cover">
+                <button
+                  class="absolute top-1 right-1 bg-white/80 hover:bg-white rounded-full p-1 text-gray-600 hover:text-red-500 transition-base"
+                  onclick="removeYorumFile()"
+                >
+                  <i class="ri-close-line"></i>
+                </button>
+              </div>
+            `;
+          };
+          reader.readAsDataURL(selectedYorumFile);
+        }
+      });
+    }
+    
+    // Yorum dosyasını kaldıran fonksiyon
+    function removeYorumFile() {
+      selectedYorumFile = null;
+      document.getElementById('yorumFile').value = "";
+      document.getElementById('yorumPreview').innerHTML = "";
+    }
+    
+    // DOM yüklendiğinde ayarlamayı başlat
+    document.addEventListener('DOMContentLoaded', function() {
+      setupYorumPreview();
+    });
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/static/service-worker.js')
+              .then(function(registration) {
+                console.log('Service Worker kayıtlı:', registration.scope);
+              })
+              .catch(function(err) {
+                console.log('Service Worker kaydı başarısız:', err);
+              });
+          });
+        }
+      </script>
+      <script>
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/static/service-worker.js')
+              .then(function(registration) {
+                console.log('Service Worker kayıtlı:', registration.scope);
+              })
+              .catch(function(err) {
+                console.log('Service Worker kaydı başarısız:', err);
+              });
+          });
+        }
+      </script>
+      <script>
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/static/service-worker.js')
+              .then(function(registration) {
+                console.log('Service Worker kayıtlı:', registration.scope);
+              })
+              .catch(function(err) {
+                console.log('Service Worker kaydı başarısız:', err);
+              });
+          });
+        }
+      </script>
+      
+</body>
+</html>
+<!-- End of HTML Document -->
