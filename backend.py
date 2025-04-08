@@ -100,15 +100,17 @@ Alternatif Kombin:
 """
 
     # Ollama ile Gemma2 çağrısı
+    GEMMA_API_URL = os.environ.get("GEMMA_API_URL", "http://localhost:11434/api/generate")
+
     response = requests.post(
-        'http://localhost:11434/api/generate',
+        GEMMA_API_URL,
         json={
-            "model": "gemma2",
-            "prompt": gemma_prompt,
-            "stream": False,
-            "options": {
-                "temperature": 0.3,
-                "num_predict": 200
+        "model": "gemma2",
+        "prompt": gemma_prompt,  # veya gemma_yorum_prompt
+        "stream": False,
+        "options": {
+            "temperature": 0.3,
+            "num_predict": 200  # yorum kısmında 150 olabilir
             }
         }
     )
