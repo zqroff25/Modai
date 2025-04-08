@@ -184,7 +184,4 @@ Maddeleri açık ve anlaşılır yaz. Süs karakterleri kullanma.
 
 if __name__ == '__main__':
     app.run(debug=True, port=8501)
-
-
-
 # Flask uygulamasını başlat
