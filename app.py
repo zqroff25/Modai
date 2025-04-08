@@ -1,4 +1,75 @@
 from flask import Flask, render_template, request, jsonify
+from ai_utils import generate_kombin, generate_yorum
+import os
+from werkzeug.utils import secure_filename
+import uuid
+
+app = Flask(__name__)
+UPLOAD_FOLDER = 'static/uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+@app.route('/')
+def index():
+    return render_template("index.html")
+
+@app.route('/kombin-olustur', methods=['POST'])
+def kombin_olustur():
+    files = request.files.getlist('files[]')
+    tarz = request.form.get('tarz', 'Casual')
+    mevsim = request.form.get('mevsim', 'İlkbahar')
+
+    if len(files) < 2:
+        return jsonify({"error": "En az 2 resim yükleyiniz."}), 400
+
+    filepaths = []
+    for file in files:
+        if file:
+            filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
+            path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(path)
+            filepaths.append(path)
+
+    result = generate_kombin(filepaths, tarz, mevsim)
+    return jsonify(result)
+
+@app.route('/yorum-olustur', methods=['POST'])
+def yorum_olustur():
+    yorum_text = request.form.get("yorum", "")
+    file = request.files.get("yorumFile")
+    path = ""
+
+    if file:
+        filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
+        path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(path)
+
+    result = generate_yorum(yorum_text, path if file else None)
+    return jsonify(result)
+
+if __name__ == '__main__':
+    app.run(debug=True, port=8501)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''from flask import Flask, render_template, request, jsonify
 import os
 from PIL import Image
 from transformers import BlipProcessor, BlipForConditionalGeneration
@@ -208,7 +279,7 @@ Kıyafet Yorumu:
 if __name__ == '__main__':
     app.run(debug=True, port=8501)
 # Flask uygulamasını başlat
-
+'''
 
 
 

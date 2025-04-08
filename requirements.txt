@@ -1,8 +1,4 @@
 Flask
 gunicorn
-transformers
-torch
-Pillow
 requests
-regex
-numpy
+werkzeug
