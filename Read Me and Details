@@ -1,0 +1,15 @@
+Projeyi çalıştırmak için tüm python kütüphaneleri doğru şekilde kurulmalıdır.
+Proje python 3.12.9 sürümü ile çalıştırılmıştır ve kütüphaneler buna göre seçilmiştir.
+Yapay zeka modeli olarak gemma2 kullanılmıştır.
+ollama pull gemma2 ile indirilebilir. ( Öncesinde bilgisayara ollama kurulmalıdır)
+Projeyi internette yayınlamak için ngrok kullanılmıştır.
+ngrok bilgisayara indirilir ve web sitesinden key alınarak kurulum yapılır.
+ngrok ile seçilen port ve app.py dosyasındaki port numarası aynı olmalıdır.
+Projeyi çalıştırmak için gereken dosya app.py dosyasıdır.
+
+Projeyi çalıştırma adımları:
+1. ollama serve komutu terminalde çalıştırılır.
+2. python app.py komutu terminalde çalıştırılır.
+3. ./ngrok http 8501 komutu terminalde çalıştırılır.
+Bu sırayla verlien komutlar çalıştırılmalıdır.
+4. Ngrok ile verilen url bilgisini tarayıcıda açarak projeyi çalıştırabilirsiniz.
